@@ -65,6 +65,10 @@ namespace AhoCorasick {
       void build();
       vector<match> search(const string& text, bool stopAfterOne) const;
       void cleanup(trie *node);
+
+      // Prevent copy and assignment, as we have owned pointers
+      Matcher & operator=(const Matcher&) = delete;
+      Matcher(const Matcher&) = delete;
   };
 
   Matcher::~Matcher() {
@@ -185,13 +189,15 @@ namespace AhoCorasick {
 
 #include <iostream>
 #include <tuple>
+#include <memory>
 
 using std::tuple;
+using std::unique_ptr;
 
 void do_test (const vector<string>& keywords, const string &input) {
   std::cout << "Testing '" << input << "'" << std::endl;
-  auto ac = AhoCorasick::Matcher(keywords);
-  for ( AhoCorasick::match m : ac.match_details(input) ) {
+  unique_ptr<AhoCorasick::Matcher> ac(new AhoCorasick::Matcher(keywords));
+  for ( AhoCorasick::match m : ac->match_details(input) ) {
     std::cout << "Matched " << m.keyword << " from " << m.start << " to " << m.end << std::endl;
   }
   std::cout << std::endl;
