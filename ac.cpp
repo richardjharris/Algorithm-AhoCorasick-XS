@@ -163,33 +163,29 @@ namespace Algorithm {
 
 #include <iostream>
 
-int main () {
-  vector<string> keywords = { "he", "she", "hers", "his" };
-  string text = "ahishers";
-
+void test (const vector<string>& keywords, const string &input) {
+  std::cout << "Testing '" << input << "'" << std::endl;
   auto ac = Algorithm::AhoCorasick(keywords);
-  for ( string match : ac.matches(text) ) {
+  for ( string match : ac.matches(input) ) {
     std::cout << "Matched " << match << std::endl;
   }
-  for ( string match : ac.matches("hers hello") ) {
-    std::cout << "* Matched " << match << std::endl;
-  }
-
   std::cout << std::endl;
+}
 
-  vector<string> keywords2 = { "a", "fai" };
-  string text2 = "fa";
-  auto ac2 = Algorithm::AhoCorasick(keywords2);
-  for ( string match : ac2.matches(text2) ) {
-    std::cout << "Matched " << match << std::endl;
+int main () {
+  {
+    vector<string> keywords = { "he", "she", "hers", "his" };
+    string text = "ahishers";
+    test(keywords, text);
   }
-
-  std::cout << std::endl;
-
-  vector<string> keywords3 = { "a", "ab", "bab", "bc", "bca", "c", "caa" };
-  string text3 = "abccab";
-  auto ac3 = Algorithm::AhoCorasick(keywords3);
-  for ( string match : ac3.matches(text3) ) {
-    std::cout << "Matched " << match << std::endl;
+  {
+    vector<string> keywords = { "a", "fai" };
+    string text = "fa";
+    test(keywords, text);
+  }
+  {
+    vector<string> keywords = { "a", "ab", "bab", "bc", "bca", "c", "caa" };
+    string text = "abccab";
+    test(keywords, text);
   }
 }
