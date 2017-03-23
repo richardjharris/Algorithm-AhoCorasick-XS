@@ -162,8 +162,11 @@ namespace Algorithm {
 #endif
 
 #include <iostream>
+#include <tuple>
 
-void test (const vector<string>& keywords, const string &input) {
+using std::tuple;
+
+void do_test (const vector<string>& keywords, const string &input) {
   std::cout << "Testing '" << input << "'" << std::endl;
   auto ac = Algorithm::AhoCorasick(keywords);
   for ( string match : ac.matches(input) ) {
@@ -173,19 +176,14 @@ void test (const vector<string>& keywords, const string &input) {
 }
 
 int main () {
-  {
-    vector<string> keywords = { "he", "she", "hers", "his" };
-    string text = "ahishers";
-    test(keywords, text);
-  }
-  {
-    vector<string> keywords = { "a", "fai" };
-    string text = "fa";
-    test(keywords, text);
-  }
-  {
-    vector<string> keywords = { "a", "ab", "bab", "bc", "bca", "c", "caa" };
-    string text = "abccab";
-    test(keywords, text);
+
+  vector<std::pair<vector<string>, string>> tests = {
+    { { "he", "she", "hers", "his" }, "ahishers" },
+    { { "a", "fai" }, "fa" },
+    { { "a", "ab", "bab", "bc", "bca", "c", "caa" }, "abccab" },
+  };
+
+  for (auto test : tests) {
+    do_test( test.first, test.second );
   }
 }
