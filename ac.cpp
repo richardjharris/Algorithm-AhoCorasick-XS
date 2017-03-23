@@ -1,226 +1,160 @@
-using namespace std;
-#include <cstring>
-#include <iostream>
+#ifndef AHO_CORASICK_HPP
+#define AHO_CORASICK_HPP
+
 #include <string>
 #include <vector>
 #include <queue>
+#include <memory>
+
+using std::string;
+using std::vector;
 
 namespace Algorithm {
+  // Number of characters in the input alphabet
+  static constexpr int MAXCHARS = 256;
+
+  struct trie {
+    unsigned char label;
+    trie *children[MAXCHARS] = {nullptr};
+    // Extensions for AC automaton
+    trie *fail = nullptr;
+    vector<int> out;
+
+    trie() : label('\0') {}
+    trie(unsigned char label) : label(label) {}
+  };
+
   class AhoCorasick {
- 
-      // Max number of states in the matching machine.
-      // Should be equal to the sum of the length of all keywords.
-      static const int MAXS = 1000;
-
-      // Maximum number of characters in input alphabet
-      // For now we just store 256 to cover the whole range
-      static const int MAXC = 256;
-
-      // OUTPUT FUNCTION IS IMPLEMENTED USING out[]
-      // Bit i in this mask is one if the word with index i
-      // appears when the machine enters this state.
-      int out[MAXS];
-      
-      // FAILURE FUNCTION IS IMPLEMENTED USING f[]
-      int f[MAXS];
-      
-      // GOTO FUNCTION (OR TRIE) IS IMPLEMENTED USING g[][]
-      int g[MAXS][MAXC];
-
-      // Number of keywords
-      int numwords;
-      vector<string> words;
+    vector<string> words;
+    trie *root;
 
     public:
-
-      AhoCorasick(vector<string> keywords) {
-        // Returns the number of states (discarded)
-        build(keywords);
+      AhoCorasick(const vector<string> & keywords)
+      : words(keywords) {
+        build();
       }
 
-      vector<string> first_match(string input) {
-        return searchWords(input, true);
+      vector<string> first_match(const string& input) const {
+        return search(input, true);
       }
 
-      vector<string> matches(string input) {
-        return searchWords(input, false);
+      vector<string> matches(const string& input) const {
+        return search(input, false);
       }
 
     private:
-      int build(vector<string> keywords);
-      int findNextState(int currentState, char nextInput);
-      vector<string> searchWords(string text, bool stopAfterOne);
+      void build();
+      vector<string> search(const string& text, bool stopAfterOne) const;
   };
 
-  int AhoCorasick::build(vector <string> keywords) {
-    // Initialize all values in output function as 0.
-    memset(out, 0, sizeof out);
- 
-    // Initialize all values in goto function as -1.
-    memset(g, -1, sizeof g);
- 
-    words = keywords;
-    numwords = words.size();
+  void AhoCorasick::build() {
+    root = new trie();
+    int i = 0;
 
-    // Initially, we just have the 0 state
-    int states = 1;
+    // 1. Build the keyword tree
+    for (string& word : words) {
+        trie *node = root;
+        // Follow the path labelled by root
+        for (char& c : word) {
+            unsigned char ch = c;
 
-    // Construct values for goto function, i.e., fill g[][]
-    // This is same as building a Trie for words[]
-    for (int i = 0; i < numwords; ++i)
-    {
-        const string &word = words[i];
-        int currentState = 0;
- 
-        // Insert all characters of current word in arr[]
-        for (size_t j = 0; j < word.size(); ++j)
-        {
-            int ch = word[j];
- 
-            // Allocate a new node (create a new state) if a
-            // node for ch doesn't exist.
-            if (g[currentState][ch] == -1)
-                g[currentState][ch] = states++;
- 
-            currentState = g[currentState][ch];
+            if (!node->children[ch]) {
+                node->children[ch] = new trie(ch);
+            }
+            node = node->children[ch];
         }
- 
-        // Add current word in output function
-        out[currentState] |= (1 << i);
+        node->out.push_back(i);
+        i++;
     }
- 
-    // For all characters which don't have an edge from
-    // root (or state 0) in Trie, add a goto edge to state
-    // 0 itself
-    for (int ch = 0; ch < MAXC; ++ch)
-        if (g[0][ch] == -1)
-            g[0][ch] = 0;
- 
-    // Now, let's build the failure function
- 
-    // Initialize values in fail function
-    memset(f, -1, sizeof f);
- 
-    // Failure function is computed in breadth first order
-    // using a queue
-    queue<int> q;
- 
-     // Iterate over every possible input
-    for (int ch = 0; ch < MAXC; ++ch)
-    {
-        // All nodes of depth 1 have failure function value
-        // as 0. For example, in above diagram we move to 0
-        // from states 1 and 3.
-        if (g[0][ch] != 0)
-        {
-            f[g[0][ch]] = 0;
-            q.push(g[0][ch]);
+
+    // 2. Complete goto function for root
+    //    Set g(root,a) = root for any a that isn't defined
+    for (unsigned int i = 0; i < MAXCHARS; i++) {
+        if (root->children[i] == nullptr) {
+            root->children[i] = root;
         }
     }
- 
-    // Now queue has states 1 and 3
-    while (q.size())
-    {
-        // Remove the front state from queue
-        int state = q.front();
-        q.pop();
- 
-        // For the removed state, find failure function for
-        // all those characters for which goto function is
-        // not defined.
-        for (int ch = 0; ch < MAXC; ch++)
-        {
-            // If goto function is defined for character 'ch'
-            // and 'state'
-            if (g[state][ch] != -1)
-            {
-                // Find failure state of removed state
-                int failure = f[state];
- 
-                // Find the deepest node labeled by proper
-                // suffix of string from root to current
-                // state.
-                while (g[failure][ch] == -1)
-                      failure = f[failure];
- 
-                failure = g[failure][ch];
-                f[g[state][ch]] = failure;
- 
-                // Merge output values
-                out[g[state][ch]] |= out[failure];
- 
-                // Insert the next level node (of Trie) in Queue
-                q.push(g[state][ch]);
+
+    // 3. Compute fail and output for all nodes, in breadth-first order
+    std::queue<trie *> queue;
+    for (unsigned int i = 0; i < MAXCHARS; i++) {
+        trie *q = root->children[i];
+        if (q != root) {
+            q->fail = root;
+            queue.push(q);
+        }
+    }
+
+    while (queue.size()) {
+        trie *r = queue.front();
+        queue.pop();
+        for (unsigned int i = 0; i < MAXCHARS; i++) {
+            trie *u = r->children[i];
+            if (u != nullptr) {
+                queue.push(u);
+                trie *v = r->fail;
+                while (v->children[i] == nullptr) {
+                    v = v->fail;
+                }
+                u->fail = v->children[i];
+                u->out.insert( u->out.end(), u->fail->out.begin(), u->fail->out.end() );
             }
         }
     }
- 
-    return states;
   }
 
-  // Returns the next state the machine will transition to using goto
-  // and failure functions.
-  // currentState - The current state of the machine. Must be between
-  //                0 and the number of states - 1, inclusive.
-  // nextInput - The next character that enters into the machine.
-  int AhoCorasick::findNextState(int currentState, char nextInput)
-  {
-      int answer = currentState;
-      int ch = nextInput;
-  
-      // If goto is not defined, use failure function
-      while (g[answer][ch] == -1)
-          answer = f[answer];
-  
-      return g[answer][ch];
-  }
- 
-  // This function finds all occurrences of all array words
-  // in text, and returns as a vector. If stopAfterOne=true,
-  // stop and return the first match only.
-  vector<string> AhoCorasick::searchWords(string text, bool stopAfterOne)
-  {
-      // Initialize current state
-      int currentState = 0;
-  
-      vector<string> matches;
+  vector<string> AhoCorasick::search(const string& text, bool stopAfterOne) const {
+    trie *q = root;
+    vector <string> matches;
+    for (const unsigned char ch : text) {
+        // If it doesn't match, follow the fail links
+        while (q->children[ch] == nullptr) {
+            // Follow fails.
+            // If nothing else, this will succeed once q = root, as fail is defined
+            // for all characters.
+            q = q->fail;
+        }
+        // We matched, so follow the goto link (may be root)
+        q = q->children[ch];
+        for (int matchOffset : q->out) {
+            matches.push_back( words[matchOffset] ); 
+            if (stopAfterOne) {
+                return matches;
+            }
+        }
+    }
 
-      // Traverse the text through the nuilt machine to find
-      // all occurrences of words in words[]
-      for (size_t i = 0; i < text.size(); i++)
-      {
-          currentState = findNextState(currentState, text[i]);
-  
-          // If match not found, move to next state
-          if (out[currentState] == 0)
-              continue;
-  
-          // Match found, print all matching words of arr[]
-          // using output function.
-          for (int j = 0; j < numwords; j++)
-          {
-              if (out[currentState] & (1 << j))
-              {
-                  // word: arr[j]
-                  // start: i - arr[j].size() + 1
-                  // end: i 
-                  matches.push_back(words[j]);
-                  if (stopAfterOne) {
-                    return matches;
-                  }
-              }
-          }
-      }
-
-      return matches;
+    return matches;
   }
 }
+
+#endif
+
+#include <iostream>
 
 int main () {
   vector<string> keywords = { "he", "she", "hers", "his" };
   string text = "ahishers";
 
   auto ac = Algorithm::AhoCorasick(keywords);
+  for ( string match : ac.matches(text) ) {
+    std::cout << "Matched " << match << std::endl;
+  }
+
+  std::cout << std::endl;
+
+  keywords = { "a", "fai" };
+  text = "fa";
+  ac = Algorithm::AhoCorasick(keywords);
+  for ( string match : ac.matches(text) ) {
+    std::cout << "Matched " << match << std::endl;
+  }
+
+  std::cout << std::endl;
+
+  keywords = { "a", "ab", "bab", "bc", "bca", "c", "caa" };
+  text = "abccab";
+  ac = Algorithm::AhoCorasick(keywords);
   for ( string match : ac.matches(text) ) {
     std::cout << "Matched " << match << std::endl;
   }
