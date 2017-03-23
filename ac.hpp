@@ -186,30 +186,3 @@ namespace AhoCorasick {
 }
 
 #endif
-
-#include <iostream>
-#include <tuple>
-
-using std::tuple;
-
-void do_test (const vector<string>& keywords, const string &input) {
-  std::cout << "Testing '" << input << "'" << std::endl;
-  AhoCorasick::Matcher ac(keywords);
-  for ( AhoCorasick::match m : ac.match_details(input) ) {
-    std::cout << "Matched " << m.keyword << " from " << m.start << " to " << m.end << std::endl;
-  }
-  std::cout << std::endl;
-}
-
-int main () {
-
-  vector<std::pair<vector<string>, string>> tests = {
-    { { "he", "she", "hers", "his" }, "ahishers" },
-    { { "a", "fai" }, "fa" },
-    { { "a", "ab", "bab", "bc", "bca", "c", "caa" }, "abccab" },
-  };
-
-  for (auto test : tests) {
-    do_test( test.first, test.second );
-  }
-}
