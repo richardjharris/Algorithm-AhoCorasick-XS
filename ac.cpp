@@ -189,15 +189,13 @@ namespace AhoCorasick {
 
 #include <iostream>
 #include <tuple>
-#include <memory>
 
 using std::tuple;
-using std::unique_ptr;
 
 void do_test (const vector<string>& keywords, const string &input) {
   std::cout << "Testing '" << input << "'" << std::endl;
-  unique_ptr<AhoCorasick::Matcher> ac(new AhoCorasick::Matcher(keywords));
-  for ( AhoCorasick::match m : ac->match_details(input) ) {
+  AhoCorasick::Matcher ac(keywords);
+  for ( AhoCorasick::match m : ac.match_details(input) ) {
     std::cout << "Matched " << m.keyword << " from " << m.start << " to " << m.end << std::endl;
   }
   std::cout << std::endl;
