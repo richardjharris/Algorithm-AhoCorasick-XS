@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <memory>
+#include "stdio.h"
 
 using std::string;
 using std::vector;
@@ -18,7 +19,7 @@ namespace Algorithm {
     trie *children[MAXCHARS] = {nullptr};
     // Extensions for AC automaton
     trie *fail = nullptr;
-    vector<int> out;
+    vector<int> out = vector<int>();
 
     trie() : label('\0') {}
     trie(unsigned char label) : label(label) {}
@@ -34,6 +35,8 @@ namespace Algorithm {
         build();
       }
 
+      ~AhoCorasick();
+
       vector<string> first_match(const string& input) const {
         return search(input, true);
       }
@@ -45,7 +48,24 @@ namespace Algorithm {
     private:
       void build();
       vector<string> search(const string& text, bool stopAfterOne) const;
+      void cleanup(trie *node);
   };
+
+  // root is a tree, provided we ignore a) references back to the root
+  //   and b) the fail pointer
+  AhoCorasick::~AhoCorasick() {
+      cleanup(root);
+  }
+
+  void AhoCorasick::cleanup(trie *node) {
+    for (unsigned int i = 0; i < MAXCHARS; i++) {
+        trie *child = node->children[i];
+        if (child != root && child != nullptr) {
+            cleanup(child);
+        }
+    }
+    delete node;
+  }
 
   void AhoCorasick::build() {
     root = new trie();
@@ -97,7 +117,18 @@ namespace Algorithm {
                     v = v->fail;
                 }
                 u->fail = v->children[i];
-                u->out.insert( u->out.end(), u->fail->out.begin(), u->fail->out.end() );
+
+                if (u->fail == nullptr) {
+                    fprintf(stderr, "u->fail is nullptr!!\n");
+                    exit(1);
+                }
+
+                if (u != u->fail) {
+                    u->out.insert( u->out.end(), u->fail->out.begin(), u->fail->out.end() );
+                }
+                else {
+                    fprintf(stderr, "u == u->fail\n");
+                }
             }
         }
     }
@@ -140,22 +171,25 @@ int main () {
   for ( string match : ac.matches(text) ) {
     std::cout << "Matched " << match << std::endl;
   }
+  for ( string match : ac.matches("hers hello") ) {
+    std::cout << "* Matched " << match << std::endl;
+  }
 
   std::cout << std::endl;
 
-  keywords = { "a", "fai" };
-  text = "fa";
-  ac = Algorithm::AhoCorasick(keywords);
-  for ( string match : ac.matches(text) ) {
+  vector<string> keywords2 = { "a", "fai" };
+  string text2 = "fa";
+  auto ac2 = Algorithm::AhoCorasick(keywords2);
+  for ( string match : ac2.matches(text2) ) {
     std::cout << "Matched " << match << std::endl;
   }
 
   std::cout << std::endl;
 
-  keywords = { "a", "ab", "bab", "bc", "bca", "c", "caa" };
-  text = "abccab";
-  ac = Algorithm::AhoCorasick(keywords);
-  for ( string match : ac.matches(text) ) {
+  vector<string> keywords3 = { "a", "ab", "bab", "bc", "bca", "c", "caa" };
+  string text3 = "abccab";
+  auto ac3 = Algorithm::AhoCorasick(keywords3);
+  for ( string match : ac3.matches(text3) ) {
     std::cout << "Matched " << match << std::endl;
   }
 }
