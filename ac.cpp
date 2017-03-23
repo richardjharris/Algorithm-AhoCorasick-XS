@@ -10,7 +10,7 @@
 using std::string;
 using std::vector;
 
-namespace Algorithm {
+namespace AhoCorasick {
   // Number of characters in the input alphabet
   static constexpr int MAXCHARS = 256;
 
@@ -25,39 +25,55 @@ namespace Algorithm {
     trie(unsigned char label) : label(label) {}
   };
 
-  class AhoCorasick {
+  struct match {
+    string keyword;
+    size_t start;
+    size_t end;
+  };
+
+  class Matcher {
     vector<string> words;
     trie *root;
 
     public:
-      AhoCorasick(const vector<string> & keywords)
+      Matcher(const vector<string> & keywords)
       : words(keywords) {
         build();
       }
 
-      ~AhoCorasick();
+      ~Matcher();
 
       vector<string> first_match(const string& input) const {
-        return search(input, true);
+        vector<match> matches = search(input, true);
+        return matches.empty() ? vector<string>({}) : vector<string>({ matches[0].keyword });
       }
 
       vector<string> matches(const string& input) const {
+        vector<match> matches = search(input, false);
+        vector<string> s;
+        for (match m: matches) {
+            s.push_back(m.keyword);
+        }
+        return s;
+      }
+
+      vector<match> match_details(const string& input) const {
         return search(input, false);
       }
 
     private:
       void build();
-      vector<string> search(const string& text, bool stopAfterOne) const;
+      vector<match> search(const string& text, bool stopAfterOne) const;
       void cleanup(trie *node);
   };
 
-  // root is a tree, provided we ignore a) references back to the root
-  //   and b) the fail pointer
-  AhoCorasick::~AhoCorasick() {
+  Matcher::~Matcher() {
       cleanup(root);
   }
 
-  void AhoCorasick::cleanup(trie *node) {
+  // root is a tree, provided we ignore a) references back to the root
+  //   and b) the fail pointer
+  void Matcher::cleanup(trie *node) {
     for (unsigned int i = 0; i < MAXCHARS; i++) {
         trie *child = node->children[i];
         if (child != root && child != nullptr) {
@@ -67,7 +83,7 @@ namespace Algorithm {
     delete node;
   }
 
-  void AhoCorasick::build() {
+  void Matcher::build() {
     root = new trie();
     int i = 0;
 
@@ -134,9 +150,10 @@ namespace Algorithm {
     }
   }
 
-  vector<string> AhoCorasick::search(const string& text, bool stopAfterOne) const {
+  vector<match> Matcher::search(const string& text, bool stopAfterOne) const {
     trie *q = root;
-    vector <string> matches;
+    vector <match> matches;
+    size_t position = 0;
     for (const unsigned char ch : text) {
         // If it doesn't match, follow the fail links
         while (q->children[ch] == nullptr) {
@@ -148,11 +165,16 @@ namespace Algorithm {
         // We matched, so follow the goto link (may be root)
         q = q->children[ch];
         for (int matchOffset : q->out) {
-            matches.push_back( words[matchOffset] ); 
+            matches.push_back( {
+                words[matchOffset],
+                position - words[matchOffset].size() + 1,
+                position,
+            } );
             if (stopAfterOne) {
                 return matches;
             }
         }
+        position++;
     }
 
     return matches;
@@ -168,9 +190,9 @@ using std::tuple;
 
 void do_test (const vector<string>& keywords, const string &input) {
   std::cout << "Testing '" << input << "'" << std::endl;
-  auto ac = Algorithm::AhoCorasick(keywords);
-  for ( string match : ac.matches(input) ) {
-    std::cout << "Matched " << match << std::endl;
+  auto ac = AhoCorasick::Matcher(keywords);
+  for ( AhoCorasick::match m : ac.match_details(input) ) {
+    std::cout << "Matched " << m.keyword << " from " << m.start << " to " << m.end << std::endl;
   }
   std::cout << std::endl;
 }
