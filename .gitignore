@@ -8,3 +8,4 @@ ac.c
 ac.o
 *.sw[op]
 Algorithm-AhoCorasick-XS-*.gz
+MANIFEST.bak
