@@ -71,26 +71,28 @@ T_STD_VECTOR_STRING
 
 // Output a list
 T_STD_VECTOR_MATCH
- AV* av = newAV();
- $arg = newRV_noinc((SV*)av);
- const unsigned int len = $var.size();
- if (len) {
-   av_extend(av, len-1);
- }
- for (unsigned int i = 0; i < len; i++) {
-   // Create a new hashref to hold the match details
-   HV *hv = newHV();
-   
-   const AhoCorasick::match &m = ($var)[i];
-   STRLEN klen = m.keyword.length();
-   // 7=strlen("keyword"), 0=tell hv_store to calculate the hash
-   hv_store(hv, "keyword", 7, newSVpv(m.keyword.c_str(), klen), 0);
-   hv_store(hv, "start", 5, newSViv(m.start), 0);
-   hv_store(hv, "end", 3, newSViv(m.end), 0);
+  {
+    U32 ix_$var;
+    size_t size_$var = $var.size();
+    SSize_t extend_size =
+        (size_$var > (sizeof(size_$var) > sizeof(SSize_t)
+                        ? AV_SIZE_MAX : size_$var))
+        ? -1 : (SSize_t)size_$var;
+    EXTEND(SP, extend_size);
+    for (ix_$var = 0; ix_$var < size_$var; ix_$var++) {
+        // Build a hashref from the match object
+        const AhoCorasick::match &m = ${var}[ix_$var];
+        HV *hv = newHV();
 
-   // Take reference of this HV so we can store it
-   SV *ref = newRV_noinc((SV *)hv);
-   av_push(av, ref);
- }
+        STRLEN klen = m.keyword.length();
 
+        // 7=strlen("keyword"), 0=tell hv_store to calculate the hash
+        hv_store(hv, "word", 4, newSVpv(m.keyword.c_str(), klen), 0);
+        hv_store(hv, "start", 5, newSViv(m.start), 0);
+        hv_store(hv, "end", 3, newSViv(m.end), 0);
+
+        ST(ix_$var) = newRV_noinc((SV *)hv);
+    }
+    XSRETURN(size_$var);
+  }
 
