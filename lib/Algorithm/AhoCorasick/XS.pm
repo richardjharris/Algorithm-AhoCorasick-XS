@@ -113,6 +113,8 @@ This will be handled for you in a future version.
 This is an early release and has not been tested thoroughly, use at your own risk.
 The API is subject to change until version 1.0.
 
+If your keyword list contains duplicates, you will get duplicate matches.
+
 =head1 COPYRIGHT & LICENSE
 
 Copyright 2017 Richard Harris. This library is free software; you may redistribute
