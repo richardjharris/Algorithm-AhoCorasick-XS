@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use List::MoreUtils qw(uniq);
 require XSLoader;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 XSLoader::load('Algorithm::AhoCorasick::XS', $VERSION);
 
 sub unique_matches {
