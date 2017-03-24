@@ -42,7 +42,7 @@ T_STD_VECTOR_STRING
 
 OUTPUT
 T_STD_STRING
-  $arg = newSVpvn($var.c_str(), $var.length());
+  $arg = sv_2mortal(newSVpvn($var.c_str(), $var.length()));
 
 // Output a list.
 T_STD_VECTOR_STRING
@@ -63,7 +63,7 @@ T_STD_VECTOR_STRING
             ? -1 : (SSize_t)size_$var;
 	    EXTEND(SP, extend_size);
 	    for (ix_$var = 0; ix_$var < size_$var; ix_$var++) {
-    		ST(ix_$var) = newSVpvn(${var}[ix_$var].c_str(), ${var}[ix_$var].length());
+    		ST(ix_$var) = sv_2mortal(newSVpvn(${var}[ix_$var].c_str(), ${var}[ix_$var].length()));
 	    }
         // xsubpp adds 'ST(0) = RETVALSV' which is undef, screwing this up
         XSRETURN(size_$var);
