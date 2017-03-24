@@ -128,4 +128,4 @@ Richard Harris <richardjharris@gmail.com>
 
 L<Algorithm::AhoCorasick>
 
-=end
+=cut
