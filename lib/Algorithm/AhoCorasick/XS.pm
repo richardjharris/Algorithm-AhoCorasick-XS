@@ -32,7 +32,7 @@ Algorithm::AhoCorasick::XS - fast Aho-Corasick multiple string matcher
  # Word hers appears from 4 to 7
 
  # I only care about the words matched
- my @words = $ac->matches($input);
+ my @words = $ac->matches($input);    # or unique_matches to remove duplicates
 
  # I only care about the first match, if any
  my $first_match = $ac->first_match($input);
@@ -84,4 +84,27 @@ within the string.
 
 =back
 
-=cut
+=head1 ENCODING SUPPORT
+
+The matcher runs at the byte level, so you can use any encoding you like. If you
+want to match strings regardless of encoding, I recommend that you encode everything
+into UTF-8 and apply NFC normalization (or perhaps NFD).
+
+=head1 CAVEATS
+
+This is an early release and has not been tested thoroughly, use at your own risk.
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2017 Richard Harris. This library is free software; you may redistribute
+it and/or modify it under the same terms as Perl itself.
+
+=head1 AUTHOR
+
+Richard Harris <richardjharris@gmail.com>
+
+=head1 SEE ALSO
+
+L<Algorithm::AhoCorasick>
+
+=end
