@@ -138,17 +138,7 @@ namespace AhoCorasick {
                 }
                 u->fail = v->children[i];
 
-                if (u->fail == nullptr) {
-                    fprintf(stderr, "u->fail is nullptr!!\n");
-                    exit(1);
-                }
-
-                if (u != u->fail) {
-                    u->out.insert( u->out.end(), u->fail->out.begin(), u->fail->out.end() );
-                }
-                else {
-                    fprintf(stderr, "u == u->fail\n");
-                }
+                u->out.insert( u->out.end(), u->fail->out.begin(), u->fail->out.end() );
             }
         }
     }
