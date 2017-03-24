@@ -10,6 +10,13 @@ extern "C" {
 
 #include "ppport.h"
 
+/* Perl 5.19.4 changed array indices from I32 to SSize_t */
+#if PERL_BCDVERSION >= 0x5019004
+#define AV_SIZE_MAX SSize_t_MAX
+#else
+#define AV_SIZE_MAX I32_MAX
+#endif
+
 #undef do_open
 #undef do_close
 

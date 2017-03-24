@@ -11,7 +11,7 @@ WriteMakefile(
     CC           => $CC,
     LD           => '$(CC)',
     XSOPT        => '-C++',
-    CCFLAGS       => '-Wall -std=c++11',
+    CCFLAGS       => '-Wall -std=c++11 -Wno-literal-suffix',
     OBJECT       => '$(O_FILES)',
     #XS           => { 'ac.xs' => 'ac.c' },
     # Force the makefile to be regenerated when the version is changed

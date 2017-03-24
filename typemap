@@ -59,7 +59,7 @@ T_STD_VECTOR_STRING
                 * (where the LH condition is false)
                 */
             (size_$var > (sizeof(size_$var) > sizeof(SSize_t)
-                            ? SSize_t_MAX : size_$var))
+                            ? AV_SIZE_MAX : size_$var))
             ? -1 : (SSize_t)size_$var;
 	    EXTEND(SP, extend_size);
 	    for (ix_$var = 0; ix_$var < size_$var; ix_$var++) {
