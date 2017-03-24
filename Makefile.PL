@@ -3,10 +3,16 @@ use ExtUtils::MakeMaker;
 
 $CC = "g++";
 
+my $mm_ver = $ExtUtils::MakeMaker::VERSION;
+if ($mm_ver =~ /_/) { # developer release/version
+    $mm_ver = eval $mm_ver;
+    die $@ if $@;
+}
+
 WriteMakefile(
     NAME         => "Algorithm::AhoCorasick::XS",
     VERSION_FROM => "lib/Algorithm/AhoCorasick/XS.pm",
-    PREREQ_PM    => { 'Test::More' => 0.96 },
+    PREREQ_PM    => { 'Test::More' => 0.96, "Data::Dump" => 0, "List::MoreUtils" => 0 },
     TYPEMAPS     => ['perlobject.map', 'typemap'],
     CC           => $CC,
     LD           => '$(CC)',
@@ -20,5 +26,8 @@ WriteMakefile(
     ($] >= 5.005 ? (
       ABSTRACT   => 'Algorithm::AhoCorasick::XS',
       AUTHOR     => 'Richard Harris <richardjharris@gmail.com>',
+    ) : ()),
+    ($mm_ver >= 6.48 ? (
+      MIN_PERL_VERSION => 5.006,
     ) : ()),
 );

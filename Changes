@@ -1,0 +1,2 @@
+24/03/2017 0.2 - Initial release.
+24/03/2017 0.3 - Fix memory leak in XS typemap code.
