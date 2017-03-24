@@ -11,3 +11,4 @@ t/edge_cases.t
 t/utf8.t
 t/variation.t
 typemap
+Changes
