@@ -21,6 +21,8 @@ Algorithm::AhoCorasick::XS - fast Aho-Corasick multiple string matcher
 
 =head1 SYNOPSIS
 
+ # *** EARLY RELEASE - API SUBJECT TO CHANGE ***
+
  my $ac = Algorithm::AhoCorasick::XS->new([qw(he she hers his)]);
  for my $match ($ac->match_details("ahishers")) {
      printf "Word %s appears from %d to %d\n", $match->{word}, $match->{start}, $match->{end}; 
@@ -90,9 +92,26 @@ The matcher runs at the byte level, so you can use any encoding you like. If you
 want to match strings regardless of encoding, I recommend that you encode everything
 into UTF-8 and apply NFC normalization (or perhaps NFD).
 
+=head2 Passing Unicode strings
+
+If you pass Unicode strings to the matcher, they will be interpreted as a sequence
+of UTF-8 bytes. This means the output of C<matches>, C<match_details> etc. will also
+be in terms of bytes.
+
+You can simply call C< decode('UTF-8', ...) > on the substrings to get their
+Unicode versions. The offsets will be in bytes though; converting them to character
+offsets in the Unicode string is a little more tricky:
+
+ use Encode qw(decode);
+ my $unicode_start = length(decode('UTF-8', bytes::substr($string, 0, $start)));
+ my $unicode_end   = $start + length(decode('UTF-8', $word)) - 1;
+
+This will be handled for you in a future version.
+
 =head1 CAVEATS
 
 This is an early release and has not been tested thoroughly, use at your own risk.
+The API is subject to change until version 1.0.
 
 =head1 COPYRIGHT & LICENSE
 
