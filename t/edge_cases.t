@@ -21,4 +21,11 @@ subtest duplicate_words => sub {
     is_deeply( [ $matcher->matches("aaa") ], ["aa", "aa", "aa", "aa"] );
 };
 
+subtest accidentally_sent_list => sub {
+    eval {
+        my $matcher = Algorithm::AhoCorasick::XS->new("foo", "bar", "baz");
+    };
+    like ($@, qr/^Usage:/, 'rejects a list');
+};
+
 done_testing;
