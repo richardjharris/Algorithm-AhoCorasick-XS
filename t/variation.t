@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More 0.88;
+use Test::More 0.96;
 
 use Algorithm::AhoCorasick::XS;
 use Data::Dump qw(dump);
