@@ -12,3 +12,4 @@ t/utf8.t
 t/variation.t
 typemap
 Changes
+README.md
