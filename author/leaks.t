@@ -9,5 +9,6 @@ leaktrace{
     $matcher = Algorithm::AhoCorasick::XS->new(['a', 'b', 'c']);
     my @a = $matcher->matches("abc");
     print join(",", @a), "\n";
+    undef $matcher;
 } -verbose;
 
