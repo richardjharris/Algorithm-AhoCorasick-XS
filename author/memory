@@ -1,0 +1,30 @@
+use strict;
+use warnings;
+use Memory::Usage;
+use Algorithm::AhoCorasick::XS;
+use String::Random qw(random_regex);
+
+srand 1000;
+
+my @acs;
+my $mu = Memory::Usage->new;
+$mu->record('starting a-z');
+
+push @acs, Algorithm::AhoCorasick::XS->new([
+    map {
+        random_regex('[a-z]{3,100}')
+    } (1..5000)
+]);
+
+$mu->record('starting printable-chars');
+push @acs, Algorithm::AhoCorasick::XS->new([
+    map {
+        random_regex('.{3,100}')
+    } (1..5000)
+]);
+
+$mu->record('all acs built');
+@acs = ();
+
+$mu->record('acs emptied');
+$mu->dump;

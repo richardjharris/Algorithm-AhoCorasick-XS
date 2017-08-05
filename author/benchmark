@@ -1,0 +1,35 @@
+use strict;
+use warnings;
+use Benchmark qw(:all);
+use Algorithm::AhoCorasick::XS;
+use String::Random qw(random_regex);
+
+srand 1000;
+
+# Data
+my $small_strings = [ map { random_regex('[a-z]{3,10}') } (1..100) ];
+my $large_strings = [ map { random_regex('[a-z]{20,100}') } (1..1000) ];
+my $input = random_regex('[a-z]{1000000}');
+
+# Benchmarks
+
+my ($small_ac, $large_ac);
+
+timethese(100, {
+    build_small_ac => sub {
+        $small_ac = Algorithm::AhoCorasick::XS->new($small_strings);
+    },
+    build_large_ac => sub {
+        $large_ac = Algorithm::AhoCorasick::XS->new($large_strings);
+    },
+});
+
+timethese(500, {
+    many_small_strings => sub {
+        $small_ac->matches($input)
+    },
+    many_large_strings => sub {
+        $large_ac->matches($input)
+    },
+});
+
