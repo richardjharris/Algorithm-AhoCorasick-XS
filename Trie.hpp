@@ -9,7 +9,9 @@ namespace AhoCorasick {
         public:
 
         unsigned char label = '\0';
-        Trie *children[4] = {nullptr};
+        // Empirically, an array of 8 delivers a good compromise between
+        // speed and memory usage.
+        Trie *children[8] = {nullptr};
         Trie *next = nullptr;
 
         // Extensions for AC automaton
@@ -21,7 +23,7 @@ namespace AhoCorasick {
         Trie(unsigned char label, Trie *parent) : label(label), parent(parent) {}
 
         static int bucket(unsigned char ch) {
-            return ch & 2;  // Mask all but last two bytes
+            return ch & 7;  // Mask all but last 3 bytes
         }
 
         Trie *get_child(unsigned char ch) {
