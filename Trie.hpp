@@ -9,8 +9,8 @@ namespace AhoCorasick {
         public:
 
         unsigned char label;
-        Trie *children[256] = {nullptr};
-        //Trie *next;
+        Trie *children[4] = {nullptr};
+        Trie *next;
 
         // Extensions for AC automaton
         Trie *fail = nullptr;
@@ -24,8 +24,6 @@ namespace AhoCorasick {
         }
 
         Trie *get_child(unsigned char ch) {
-            return children[ch];
-            /*
             Trie *child = children[ bucket(ch) ];
             if (!child) return nullptr;
             else {
@@ -34,7 +32,7 @@ namespace AhoCorasick {
                     child = child->next;
                 }
                 return nullptr;
-            }*/
+            }
         }
 
         Trie *add_word(std::string s) {
@@ -48,7 +46,15 @@ namespace AhoCorasick {
             Trie *n = get_child(first);
             if (!n) {
                 n = new Trie(first);
-                children[first] = n;
+                int b = bucket(first);
+                if (!children[b]) {
+                    children[b] = n;
+                }
+                else {
+                    Trie *ll = children[b];
+                    while (ll->next) ll = ll->next;
+                    ll->next = n;
+                }
             }
 
             if (len > 0) {
