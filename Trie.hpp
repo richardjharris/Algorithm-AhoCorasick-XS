@@ -10,14 +10,15 @@ namespace AhoCorasick {
 
         unsigned char label;
         Trie *children[4] = {nullptr};
-        Trie *next;
+        Trie *next = nullptr;
 
         // Extensions for AC automaton
         Trie *fail = nullptr;
         std::vector<int> out = std::vector<int>();
+        Trie *parent = nullptr;
 
         Trie() : label('\0') {}
-        Trie(unsigned char label) : label(label) {}
+        Trie(unsigned char label, Trie *parent) : label(label), parent(parent) {}
 
         static int bucket(unsigned char ch) {
             return ch & 2;  // Mask all but last two bytes
@@ -45,7 +46,7 @@ namespace AhoCorasick {
             unsigned char first = *word;
             Trie *n = get_child(first);
             if (!n) {
-                n = new Trie(first);
+                n = new Trie(first, this);
                 int b = bucket(first);
                 if (!children[b]) {
                     children[b] = n;

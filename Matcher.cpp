@@ -36,14 +36,13 @@ namespace AhoCorasick {
     //   and b) the fail pointer
     void Matcher::cleanup(Trie *node) {
         delete root;
-        for (unsigned int i = 0; i < 256; i++) {
-            Trie *child = node->children[i];
+        for (Trie *child: node->children) {
             if (child != root && child != nullptr) {
                 cleanup(child);
             }
-            //if (node->next) {
-            //    cleanup(node->next);
-            //}
+            if (node->next) {
+                cleanup(node->next);
+            }
         }
         delete node;
     }
@@ -59,66 +58,74 @@ namespace AhoCorasick {
             i++;
         }
 
-        // 2. Complete goto function for root
-        //    Set g(root,a) = root for any a that isn't defined
-        for (unsigned int i = 0; i < 256; i++) {
-            if (root->children[i] == nullptr) {
-                root->children[i] = root;
-            }
-        }
+        root->fail = root;
 
-        // 3. Compute fail and output for all nodes, in breadth-first order
         std::queue<Trie *> queue;
-        for (unsigned int i = 0; i < 256; i++) {
-            Trie *q = root->children[i];
-            if (q != root) {
-                q->fail = root;
-                queue.push(q);
-            }
-        }
+        queue.push(root);
 
         while (queue.size()) {
-            Trie *r = queue.front();
+            Trie *n = queue.front();
             queue.pop();
-            for (unsigned int i = 0; i < 256; i++) {
-                Trie *u = r->children[i];
-                if (u != nullptr) {
-                    queue.push(u);
-                    Trie *v = r->fail;
-                    while (v->children[i] == nullptr) {
-                        v = v->fail;
-                    }
-                    u->fail = v->children[i];
 
-                    u->out.insert( u->out.end(), u->fail->out.begin(), u->fail->out.end() );
+            // add children to queue
+            for (Trie *child: n->children) {
+                while (child) {
+                    queue.push(child);
+                    child = child->next;
                 }
             }
+
+            // root's fail function is root
+            if (n == root) continue;
+
+            // Follow fail function from parent to find the longest suffix
+            // (or reach the root)
+            Trie *fail = n->parent->fail;
+            while (fail->get_child(n->label) == nullptr && fail != root) {
+                fail = fail->fail;
+            }
+
+            // We found the suffix...
+            n->fail = fail->get_child(n->label);
+
+            // ??
+            if (n->fail == nullptr) n->fail = root;
+            if (n->fail == n) n->fail = root;
         }
     }
 
     vector<match> Matcher::search(const string& text, bool stopAfterOne) const {
-        Trie *q = root;
+        Trie *n = root;
         vector <match> matches;
         size_t position = 0;
         for (const unsigned char ch : text) {
             // If it doesn't match, follow the fail links
-            while (q->children[ch] == nullptr) {
+            while (n->get_child(ch) == nullptr && n != root) {
                 // Follow fails.
-                // If nothing else, this will succeed once q = root, as fail is defined
+                // If nothing else, this will succeed once n = root, as fail is defined
                 // for all characters.
-                q = q->fail;
+                n = n->fail;
             }
-            // We matched, so follow the goto link (may be root)
-            q = q->children[ch];
-            for (int matchOffset : q->out) {
-                matches.push_back( {
-                    words[matchOffset],
-                    position - words[matchOffset].size() + 1,
-                    position,
-                } );
-                if (stopAfterOne) {
-                    return matches;
+
+            if (n == root) {
+                n = n->get_child(ch);
+                if (n == nullptr) n = root;
+            }
+            else n = n->get_child(ch);
+
+            Trie *no = n;
+            while (no != root) {
+                for (int matchOffset : no->out) {
+                    matches.push_back( {
+                        words[matchOffset],
+                        position - words[matchOffset].size() + 1,
+                        position,
+                    } );
+                    if (stopAfterOne) {
+                        return matches;
+                    }
                 }
+                no = no->fail;
             }
             position++;
         }
