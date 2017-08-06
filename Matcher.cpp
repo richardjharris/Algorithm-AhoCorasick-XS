@@ -53,7 +53,7 @@ namespace AhoCorasick {
         // 1. Build the keyword tree
         for (string& word : words) {
             Trie *node = root->add_word(word);
-            node->out.push_back(i);
+            node->out.push_front(i);
             i++;
         }
 
@@ -65,6 +65,9 @@ namespace AhoCorasick {
         while (queue.size()) {
             Trie *n = queue.front();
             queue.pop();
+
+            // Reverse the order of this node's out, so earlier keywords are first
+            n->out.reverse();
 
             // add children to queue
             for (Trie *child: n->children) {

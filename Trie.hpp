@@ -1,23 +1,23 @@
 #ifndef __AHOCORASICK_TRIE_INCLUDED__
 #define __AHOCORASICK_TRIE_INCLUDED__
 
-#include <vector>
+#include <forward_list>
 #include <string>
 
 namespace AhoCorasick {
     class Trie {
         public:
 
-        unsigned char label;
+        unsigned char label = '\0';
         Trie *children[4] = {nullptr};
         Trie *next = nullptr;
 
         // Extensions for AC automaton
         Trie *fail = nullptr;
-        std::vector<int> out = std::vector<int>();
+        std::forward_list<int> out;
         Trie *parent = nullptr;
 
-        Trie() : label('\0') {}
+        Trie() {}
         Trie(unsigned char label, Trie *parent) : label(label), parent(parent) {}
 
         static int bucket(unsigned char ch) {
