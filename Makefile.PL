@@ -17,9 +17,8 @@ WriteMakefile(
     CC           => $CC,
     LD           => '$(CC)',
     XSOPT        => '-C++',
-    CCFLAGS       => '-Wall -std=c++11 -Wno-literal-suffix',
+    CCFLAGS       => '-Wall -std=c++11',
     OBJECT       => '$(O_FILES)',
-    #XS           => { 'ac.xs' => 'ac.c' },
     # Force the makefile to be regenerated when the version is changed
     depend       => { '$(FIRST_MAKEFILE)' => '$(VERSION_FROM)' },
     # New keywords since 5.5

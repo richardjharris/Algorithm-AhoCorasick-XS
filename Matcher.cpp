@@ -29,17 +29,21 @@ namespace AhoCorasick {
     }
 
     Matcher::~Matcher() {
-        cleanup(root);
+        delete root;
     }
 
     // root is a tree, provided we ignore a) references back to the root
     //   and b) the fail pointer
     void Matcher::cleanup(Trie *node) {
+        delete root;
         for (unsigned int i = 0; i < 256; i++) {
             Trie *child = node->children[i];
             if (child != root && child != nullptr) {
                 cleanup(child);
             }
+            //if (node->next) {
+            //    cleanup(node->next);
+            //}
         }
         delete node;
     }
@@ -50,16 +54,7 @@ namespace AhoCorasick {
 
         // 1. Build the keyword tree
         for (string& word : words) {
-            Trie *node = root;
-            // Follow the path labelled by root
-            for (char& c : word) {
-                unsigned char ch = c;
-
-                if (!node->children[ch]) {
-                    node->children[ch] = new Trie(ch);
-                }
-                node = node->children[ch];
-            }
+            Trie *node = root->add_word(word);
             node->out.push_back(i);
             i++;
         }
