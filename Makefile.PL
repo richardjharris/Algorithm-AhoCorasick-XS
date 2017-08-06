@@ -30,3 +30,11 @@ WriteMakefile(
       MIN_PERL_VERSION => 5.006,
     ) : ()),
 );
+
+# Possible fix for FreeBSD
+sub MY::postamble {
+    return <<'END'
+test_dynamic ::
+
+END
+}
