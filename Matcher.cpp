@@ -29,20 +29,19 @@ namespace AhoCorasick {
     }
 
     Matcher::~Matcher() {
-        delete root;
+        cleanup(root);
     }
 
     // root is a tree, provided we ignore a) references back to the root
     //   and b) the fail pointer
     void Matcher::cleanup(Trie *node) {
-        delete root;
         for (Trie *child: node->children) {
-            if (child != root && child != nullptr) {
+            if (child && child != root) {
                 cleanup(child);
             }
-            if (node->next) {
-                cleanup(node->next);
-            }
+        }
+        if (node->next && node->next != root) {
+            cleanup(node->next);
         }
         delete node;
     }
