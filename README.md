@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/richardjharris/Algorithm-AhoCorasick-XS.svg?branch=master)](https://travis-ci.org/richardjharris/Algorithm-AhoCorasick-XS)
+[![Coverage Status](https://coveralls.io/repos/github/richardjharris/Algorithm-AhoCorasick-XS/badge.svg?branch=master)](https://coveralls.io/github/richardjharris/Algorithm-AhoCorasick-XS?branch=master)
+
 # NAME
 
 Algorithm::AhoCorasick::XS - fast Aho-Corasick multiple string matcher
