@@ -12,7 +12,12 @@ if ($mm_ver =~ /_/) { # developer release/version
 WriteMakefile(
     NAME         => "Algorithm::AhoCorasick::XS",
     VERSION_FROM => "lib/Algorithm/AhoCorasick/XS.pm",
-    PREREQ_PM    => { 'Test::More' => 0.96, "Data::Dump" => 0, "List::MoreUtils" => 0 },
+    PREREQ_PM    => {
+        'Test::More' => 0.96,
+        "Data::Dump" => 0,
+        "List::MoreUtils" => 0,
+        "String::Random" => 0,
+    },
     TYPEMAPS     => ['perlobject.map', 'typemap'],
     CC           => $CC,
     LD           => '$(CC)',
