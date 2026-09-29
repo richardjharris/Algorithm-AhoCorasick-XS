@@ -11,7 +11,9 @@ T_STD_STRING
   if (!SvOK($arg)) {
     $var = std::string();
   } else {
-    $var = std::string(SvPV_nolen($arg), SvCUR($arg));
+    STRLEN len;
+    const char *p = SvPV($arg,len);
+    $var = std::string(p,len);
   }
 
 // From ExtUtils::Typemap::STL::Vector.
